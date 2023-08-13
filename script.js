@@ -1,3 +1,6 @@
+let AUDIO_START_SCREEN = new Audio('sounds/startScreen.mp3')
+
+
 let fields = [
   null,
   null,
@@ -9,37 +12,65 @@ let fields = [
   null,
   null,
 ];
-const WINNING_COMBINATIONS = [
+
+
+let WINNING_COMBINATIONS = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8], // horizontal
   [0, 3, 6], [1, 4, 7], [2, 5, 8], // vertical
   [0, 4, 8], [2, 4, 6], // diagonal
 ];
+
+
 let currentPlayer = 'circle';
+
+
 function init() {
+  startGame();
   render();
 }
+
+
 function render() {
-  const contentDiv = document.getElementById('content');
-  // Generate table HTML
-  let tableHtml = '<table>';
+  let contentDiv = document.getElementById('content');
+  
+  let tableHtml = '<table>'; // generiert HTML <tabel></tabel>
   for (let i = 0; i < 3; i++) {
       tableHtml += '<tr>';
       for (let j = 0; j < 3; j++) {
-          const index = i * 3 + j;
+          let index = i * 3 + j;
           let symbol = '';
           if (fields[index] === 'circle') {
               symbol = generateCircleSVG();
           } else if (fields[index] === 'cross') {
               symbol = generateCrossSVG();
           }
-          tableHtml += `<td onclick="handleClick(this, ${index})">${symbol}</td>`;
+          tableHtml += `<td class="d-none" onclick="handleClick(this, ${index})">${symbol}</td>`;
       }
       tableHtml += '</tr>';
   }
   tableHtml += '</table>';
-  // Set table HTML to contentDiv
-  contentDiv.innerHTML = tableHtml;
+  
+  contentDiv.innerHTML = tableHtml; // fügt dem content Container das HTML tag table hinzu 
 }
+
+
+function startGame() {
+  let startScreen = document.getElementById('startScreen');
+  startScreen.innerHTML = '';
+  startScreen.innerHTML = generateStartScreenHTML();
+}
+
+
+function generateStartScreenHTML() {
+  return /*html*/`
+    <div class="start-screen">
+      <h1>TIC TAC TOE</h1>
+      <button id="playButton" class="play-button">Let's Play</button>
+    </div>
+  `
+}
+
+
 function handleClick(cell, index) {
   if (fields[index] === null) {
       fields[index] = currentPlayer;
@@ -47,17 +78,21 @@ function handleClick(cell, index) {
       cell.onclick = null;
       currentPlayer = currentPlayer === 'circle' ? 'cross' : 'circle';
       if (isGameFinished()) {
-          const winCombination = getWinningCombination();
+          let winCombination = getWinningCombination();
           drawWinningLine(winCombination);
       }
   }
 }
-function isGameFinished() {
+
+
+function isGameFinished() { // Überptüft, ob das Spiel beednet ist.
   return fields.every((field) => field !== null) || getWinningCombination() !== null;
 }
+
+
 function getWinningCombination() {
   for (let i = 0; i < WINNING_COMBINATIONS.length; i++) {
-      const [a, b, c] = WINNING_COMBINATIONS[i];
+      let [a, b, c] = WINNING_COMBINATIONS[i];
       if (fields[a] === fields[b] && fields[b] === fields[c] && fields[a] !== null) {
           return WINNING_COMBINATIONS[i];
       }
@@ -105,7 +140,7 @@ function generateCrossSVG() {
 
 function drawWinningLine(combination) {
   let lineColor = '#ffffff';
-  let lineWidth = 5;
+  let lineWidth = 10;
 
 
   let startCell = document.querySelectorAll(`td`)[combination[0]];
@@ -135,6 +170,7 @@ function drawWinningLine(combination) {
   line.style.left = `${startRect.left + startRect.width / 2 - contentRect.left}px`;
   line.style.transform = `rotate(${lineAngle}rad)`;
   line.style.transformOrigin = `top left`;
+  line.classList.add('blink-animation');
   document.getElementById('content').appendChild(line);
 }
 
